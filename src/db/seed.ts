@@ -352,43 +352,121 @@ async function seed() {
     },
   ])
 
-  // Historical billable entries for the attorney across the year, so the
-  // Financial Metrics bars and the Detailed Annual Report show a real trend.
-  // Prior-month work is marked billed (attached to the paid invoice); the
-  // current month's work stays unbilled WIP via the entries above.
+  // Historical time entries across the year so the dashboards look ALIVE — the
+  // Firm Overview's Utilization/Realization charts, the Financial Metrics bars,
+  // and the Detailed Annual Report all read these. We fill EVERY business day
+  // of each month-to-date with near-target billable work for the attorney AND
+  // the paralegal (so utilization sits at a healthy, month-to-month-varying
+  // fraction of capacity), sprinkle in non-billable internal time so that
+  // series is visible, and taper how much of each month is invoiced — older
+  // months mostly billed, recent months still being billed, the current month
+  // all unbilled WIP — so realization lands below 100% and varies by month.
   const now = new Date()
   const year = now.getFullYear()
   const currentMonth = now.getMonth()
-  const monthlyPattern = [
-    {
-      day: 8,
-      seconds: 3 * 3600,
-      narrative: 'Deposition preparation',
-      activity: 'Litigation',
-    },
-    {
-      day: 18,
-      seconds: Math.round(2.5 * 3600),
-      narrative: 'Contract negotiation',
-      activity: 'Drafting',
-    },
+
+  // Per-month intensity: the fraction of each person's DAILY billable target
+  // they actually log that month. Varied so the monthly bars aren't a flat wall.
+  const MONTH_INTENSITY = [
+    0.82, 0.68, 0.91, 0.74, 0.88, 0.7, 0.85, 0.79, 0.93, 0.76, 0.72, 0.86,
   ]
+
+  // Rotate matters (matter 3 carries the $350 rate override) + activities so the
+  // narratives and per-entry rates aren't all identical.
+  const billableMatters: Array<[string, string]> = [
+    [MATTER_1_ID, '300.00'],
+    [MATTER_2_ID, '300.00'],
+    [MATTER_3_ID, '350.00'],
+  ]
+  const billableActivities: Array<[string, string]> = [
+    ['Drafting', 'Draft and revise pleadings'],
+    ['Review/Analyze', 'Review discovery production'],
+    ['Legal Research', 'Research controlling authority'],
+    ['Communicate (Client)', 'Client status call'],
+    ['Court Appearance', 'Hearing preparation'],
+    ['Deposition', 'Deposition preparation'],
+  ]
+
+  const round2 = (n: number) => Math.round(n * 100) / 100
+  const isBizDay = (d: Date) => d.getDay() !== 0 && d.getDay() !== 6
+
   const historical: Array<typeof timeEntries.$inferInsert> = []
-  for (let m = 0; m < currentMonth; m++) {
-    for (const p of monthlyPattern) {
+  // Months 0..currentMonth inclusive; the current month only fills up to today.
+  for (let m = 0; m <= currentMonth; m++) {
+    const intensity = MONTH_INTENSITY[m]
+    // Invoiced share, tapering by recency: current month is all WIP (0), the
+    // most recent prior month 30%, then 60%, then 90% for anything older.
+    const recencyGap = currentMonth - m
+    const billedShare =
+      recencyGap === 0 ? 0 : recencyGap === 1 ? 0.3 : recencyGap === 2 ? 0.6 : 0.9
+
+    const daysInMonth = new Date(year, m + 1, 0).getDate()
+    const lastDay =
+      m === currentMonth ? Math.min(now.getDate(), daysInMonth) : daysInMonth
+
+    let dayIndex = 0
+    for (let day = 1; day <= lastDay; day++) {
+      const date = new Date(year, m, day, 12, 0, 0)
+      if (!isBizDay(date)) continue
+
+      // Small deterministic per-day jitter so consecutive days differ a little.
+      const jitter = 0.85 + ((day * 7) % 6) / 20 // 0.85 .. 1.10
+      // Spread the invoiced days evenly through the month per billedShare.
+      const billed = (dayIndex % 10) / 10 < billedShare
+      const invoiceId = billed ? INVOICE_1_ID : null
+      const [matterId, attorneyRate] =
+        billableMatters[dayIndex % billableMatters.length]
+      const [activity, narrative] =
+        billableActivities[dayIndex % billableActivities.length]
+
+      // Attorney: ~8h/day target × intensity × jitter of billable work.
       historical.push({
         firmId: DEMO_FIRM_ID,
-        matterId: MATTER_1_ID,
+        matterId,
         userId: DEMO_USER_ID,
-        date: new Date(year, m, p.day, 12, 0, 0),
-        narrative: p.narrative,
-        activity: p.activity,
+        date,
+        narrative,
+        activity,
         billable: 'billable',
-        rate: '300.00',
-        durationSeconds: p.seconds,
+        rate: attorneyRate,
+        durationSeconds: Math.round(round2(8 * intensity * jitter) * 3600),
         running: false,
-        invoiceId: INVOICE_1_ID, // prior-month work = billed
+        invoiceId,
       })
+
+      // Paralegal: ~6h/day target × intensity × jitter.
+      historical.push({
+        firmId: DEMO_FIRM_ID,
+        matterId,
+        userId: USER_PARALEGAL_ID,
+        date,
+        narrative: 'Document prep and filing support',
+        activity: 'Filing',
+        billable: 'billable',
+        rate: '150.00',
+        durationSeconds: Math.round(round2(6 * intensity * jitter) * 3600),
+        running: false,
+        invoiceId,
+      })
+
+      // Roughly weekly, some non-billable internal time (so that series shows).
+      if (dayIndex % 5 === 2) {
+        historical.push({
+          firmId: DEMO_FIRM_ID,
+          matterId: null,
+          userId: DEMO_USER_ID,
+          date,
+          narrative: 'Internal case strategy meeting',
+          activity: 'Conference/Meeting',
+          billable: 'non_billable',
+          rate: '300.00',
+          durationSeconds: Math.round(round2(1.5 * jitter) * 3600),
+          running: false,
+          invoiceId: null,
+        })
+      }
+
+      dayIndex++
     }
   }
   if (historical.length > 0) {
