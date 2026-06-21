@@ -24,7 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const H = 260
 const FALLBACK_W = 720 // SSR / first paint, before we can measure.
-const PAD = { left: 60, right: 16, top: 16, bottom: 28 }
+const PAD = { left: 72, right: 16, top: 16, bottom: 28 }
 const PLOT_H = H - PAD.top - PAD.bottom
 
 export function AnnualReportWidget() {
