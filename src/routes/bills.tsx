@@ -314,7 +314,7 @@ function BillsPage() {
             })
           }
         >
-          <TabsList>
+          <TabsList className="max-w-full overflow-x-auto">
             {statusFilters.map((s) => (
               <TabsTrigger key={s} value={s}>
                 {statusFilterLabels[s]}

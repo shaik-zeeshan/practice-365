@@ -81,7 +81,10 @@ export function TimekeeperPopover() {
           <Clock className="size-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-96 p-0">
+      <PopoverContent
+        align="end"
+        className="w-96 max-w-[calc(100vw-1rem)] p-0"
+      >
         <div className="flex items-center justify-between p-3">
           <div className="text-sm font-medium">Today&apos;s time</div>
           <Button

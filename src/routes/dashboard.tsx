@@ -86,11 +86,15 @@ function DashboardPage() {
       </div>
 
       <Tabs defaultValue="personal">
-        <TabsList variant="line" className="mb-4">
-          <TabsTrigger value="personal">Personal Dashboard</TabsTrigger>
-          <TabsTrigger value="firm">Firm Dashboard</TabsTrigger>
-          <TabsTrigger value="feed">Firm Feed</TabsTrigger>
-        </TabsList>
+        {/* Scrollable on narrow screens; pb keeps the active underline
+            (positioned 5px below the strip) from being clipped. */}
+        <div className="mb-4 overflow-x-auto pb-1.5">
+          <TabsList variant="line">
+            <TabsTrigger value="personal">Personal Dashboard</TabsTrigger>
+            <TabsTrigger value="firm">Firm Dashboard</TabsTrigger>
+            <TabsTrigger value="feed">Firm Feed</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="personal" className="space-y-5">
           <TodaysAgendaWidget />

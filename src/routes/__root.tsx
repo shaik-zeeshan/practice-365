@@ -6,11 +6,19 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { Menu } from 'lucide-react'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 import { GlobalTimer } from '@/components/timer/GlobalTimer'
 import { TimekeeperPopover } from '@/components/timer/TimekeeperPopover'
@@ -23,6 +31,17 @@ import type { QueryClient } from '@tanstack/react-query'
 interface MyRouterContext {
   queryClient: QueryClient
 }
+
+// The primary nav, shared by the desktop bar and the mobile menu so the two
+// can never drift out of sync.
+const navItems = [
+  { to: '/dashboard', label: 'Dashboard' },
+  { to: '/time', label: 'Time' },
+  { to: '/clients', label: 'Clients' },
+  { to: '/matters', label: 'Matters' },
+  { to: '/bills', label: 'Bills' },
+  { to: '/settings', label: 'Settings' },
+] as const
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -48,6 +67,43 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
 })
 
+/**
+ * Mobile navigation — a hamburger button (hidden at md+) that opens a dropdown
+ * of the same nav links the desktop bar shows. The dropdown auto-closes on
+ * selection, so tapping a link navigates and dismisses the menu.
+ */
+function MobileNav() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="md:hidden"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="size-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-48">
+        {navItems.map(({ to, label }) => (
+          <DropdownMenuItem key={to} asChild>
+            <Link
+              to={to}
+              className="cursor-pointer"
+              activeProps={{
+                className: 'bg-accent text-accent-foreground',
+              }}
+            >
+              {label}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -63,22 +119,18 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         */}
         <TooltipProvider>
           <div className="flex min-h-screen flex-col">
-            <header className="flex h-14 items-center justify-between border-b px-4">
-              <div className="flex items-center gap-6">
-                <Link to="/" className="text-lg font-semibold tracking-tight">
+            <header className="flex h-14 items-center justify-between gap-2 border-b px-4">
+              <div className="flex min-w-0 items-center gap-2 md:gap-6">
+                {/* Hamburger menu — mobile only; the inline nav takes over at md. */}
+                <MobileNav />
+                <Link
+                  to="/"
+                  className="truncate text-lg font-semibold tracking-tight"
+                >
                   Practice365
                 </Link>
-                <nav className="flex items-center gap-1">
-                  {(
-                    [
-                      { to: '/dashboard', label: 'Dashboard' },
-                      { to: '/time', label: 'Time' },
-                      { to: '/clients', label: 'Clients' },
-                      { to: '/matters', label: 'Matters' },
-                      { to: '/bills', label: 'Bills' },
-                      { to: '/settings', label: 'Settings' },
-                    ] as const
-                  ).map(({ to, label }) => (
+                <nav className="hidden items-center gap-1 md:flex">
+                  {navItems.map(({ to, label }) => (
                     <Link
                       key={to}
                       to={to}
