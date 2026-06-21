@@ -53,11 +53,11 @@ export function BillingMetricsWidget() {
   ]
 
   return (
-    <section>
+    <section className="flex h-full flex-col">
       <h2 className="mb-2 text-sm font-semibold tracking-tight">
         Billing Metrics for Firm
       </h2>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid flex-1 gap-3 sm:grid-cols-3 lg:grid-cols-1 lg:grid-rows-3">
         {cards.map((c) => {
           const Icon = c.icon
           const isDanger = c.danger && c.bucket.count > 0
@@ -68,7 +68,7 @@ export function BillingMetricsWidget() {
               search={{ status: c.status }}
               className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
-              <Card className="py-4 transition-colors hover:bg-muted/50">
+              <Card className="h-full justify-center py-4 transition-colors hover:bg-muted/50">
                 <CardContent className="space-y-1">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-medium text-muted-foreground">
