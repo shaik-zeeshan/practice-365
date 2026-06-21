@@ -280,7 +280,6 @@ export function MatterFormDialog({ matter, trigger }: MatterFormDialogProps) {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>Leave blank to inherit.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

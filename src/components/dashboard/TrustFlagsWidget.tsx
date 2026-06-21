@@ -45,7 +45,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -410,9 +409,6 @@ function NewTrustAccountDialog({
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                    The account is flagged when its balance falls below this.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -643,9 +639,6 @@ function RecordTransactionDialog({
                   <FormControl>
                     <Input type="datetime-local" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Leave blank to use the current time.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

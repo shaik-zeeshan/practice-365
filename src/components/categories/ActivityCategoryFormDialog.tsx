@@ -17,7 +17,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -307,10 +306,6 @@ export function ActivityCategoryFormDialog({
                   <FormControl>
                     <Input placeholder="Everyone" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Who can use this category. Free-text for now until
-                    permission groups are modelled.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
