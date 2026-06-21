@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "target_revenue_per_month" numeric(12, 2) DEFAULT '0' NOT NULL;
