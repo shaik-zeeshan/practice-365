@@ -13,3 +13,6 @@ dist-ssr
 .vinxi
 __unconfig*
 todos.json
+
+# TanStack Router generated route tree
+src/routeTree.gen.ts
