@@ -230,6 +230,9 @@ export function TimeEntryModal() {
       toast.success(entryId ? 'Time entry updated' : 'Time entry saved')
       queryClient.invalidateQueries({ queryKey: ['today-entries'] })
       queryClient.invalidateQueries({ queryKey: ['time-entries'] })
+      // Time entries drive the personal + firm dashboards (utilization /
+      // realization), so refresh them too — otherwise those charts go stale.
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       // Drop the timer object for this entry — it is now persisted WIP.
       if (entryId) useTimerStore.getState().clear(entryId)
       close()

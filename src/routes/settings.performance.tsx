@@ -75,7 +75,9 @@ function PerformanceSettingsPage() {
   async function onSubmit(values: FormValues) {
     const updated = await updatePerformanceTargets({ data: values })
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['dashboard', 'personal'] }),
+      // Targets drive both the personal dashboard AND the firm overview's
+      // utilization capacity, so invalidate the whole 'dashboard' tree.
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
       queryClient.invalidateQueries({
         queryKey: performanceTargetsQueryOptions.queryKey,
       }),

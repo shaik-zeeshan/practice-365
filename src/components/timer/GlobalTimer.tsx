@@ -78,6 +78,9 @@ export function GlobalTimer() {
     onSuccess: (row) => {
       queryClient.invalidateQueries({ queryKey: ['today-entries'] })
       queryClient.invalidateQueries({ queryKey: ['time-entries'] })
+      // Stopped time is now persisted, so the dashboards (personal + firm
+      // utilization/realization) need to refetch to reflect it.
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       toast.success('Timer stopped — review & save')
       openForEntry(row.id, { fromTimer: true })
     },
