@@ -14,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { TablePagination } from '@/components/ui/pagination'
+import { usePagination } from '@/hooks/use-pagination'
 import { Badge } from '@/components/ui/badge'
 import type { TimeEntryListItem } from '@/server/time-entries'
 
@@ -100,6 +102,9 @@ function TimePage() {
     }
   }
 
+  // Paginate the rendered rows; the totals above stay over the full set.
+  const pagination = usePagination(entries)
+
   return (
     <div className="p-4 md:p-6">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
@@ -154,7 +159,7 @@ function TimePage() {
                 </TableCell>
               </TableRow>
             ) : (
-              entries.map((entry) => {
+              pagination.pageItems.map((entry) => {
                 const badge = billableBadge(entry.billable)
                 const { billedHours, amount } = computeAmount({
                   durationSeconds: entry.durationSeconds,
@@ -235,6 +240,12 @@ function TimePage() {
             </TableFooter>
           ) : null}
         </Table>
+        {entries.length > 0 ? (
+          <TablePagination
+            pagination={pagination}
+            itemLabel={['entry', 'entries']}
+          />
+        ) : null}
       </div>
     </div>
   )

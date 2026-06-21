@@ -26,6 +26,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { TablePagination } from '@/components/ui/pagination'
+import { usePagination } from '@/hooks/use-pagination'
 import { ActivityCategoryFormDialog } from '@/components/categories/ActivityCategoryFormDialog'
 
 // ===========================================================================
@@ -124,10 +126,18 @@ function CategoriesPage() {
         </div>
 
         <TabsContent value="time_entry">
-          <CategoryTable rows={visible} type="time_entry" />
+          <CategoryTable
+            rows={visible}
+            type="time_entry"
+            resetKey={`${tab}:${keyword}`}
+          />
         </TabsContent>
         <TabsContent value="expense">
-          <CategoryTable rows={visible} type="expense" />
+          <CategoryTable
+            rows={visible}
+            type="expense"
+            resetKey={`${tab}:${keyword}`}
+          />
         </TabsContent>
       </Tabs>
     </div>
@@ -137,10 +147,14 @@ function CategoriesPage() {
 function CategoryTable({
   rows,
   type,
+  resetKey,
 }: {
   rows: Array<ActivityCategory>
   type: 'time_entry' | 'expense'
+  resetKey?: unknown
 }) {
+  const pagination = usePagination(rows, { resetKey })
+
   if (rows.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-12 text-center">
@@ -175,7 +189,7 @@ function CategoryTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((c) => (
+          {pagination.pageItems.map((c) => (
             <TableRow key={c.id} className={c.archived ? 'opacity-60' : ''}>
               <TableCell className="font-medium">
                 <span className="flex items-center gap-2">
@@ -211,6 +225,10 @@ function CategoryTable({
           ))}
         </TableBody>
       </Table>
+      <TablePagination
+        pagination={pagination}
+        itemLabel={['category', 'categories']}
+      />
     </div>
   )
 }

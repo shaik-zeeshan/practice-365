@@ -11,6 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { TablePagination } from '@/components/ui/pagination'
+import { usePagination } from '@/hooks/use-pagination'
 import { ClientFormDialog } from '@/components/clients/ClientFormDialog'
 
 // ===========================================================================
@@ -38,6 +40,7 @@ export const Route = createFileRoute('/clients')({
 
 function ClientsPage() {
   const { data: clients } = useSuspenseQuery(clientsQueryOptions)
+  const pagination = usePagination(clients)
 
   return (
     <div className="p-4 md:p-6">
@@ -72,7 +75,7 @@ function ClientsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {clients.map((client) => (
+              {pagination.pageItems.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell className="font-medium">{client.name}</TableCell>
                   <TableCell className="text-right tabular-nums">
@@ -92,6 +95,10 @@ function ClientsPage() {
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            pagination={pagination}
+            itemLabel={['client', 'clients']}
+          />
         </div>
       )}
     </div>

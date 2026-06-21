@@ -43,6 +43,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { TablePagination } from '@/components/ui/pagination'
+import { usePagination } from '@/hooks/use-pagination'
 
 // ===========================================================================
 // /bills — firm invoices & receivables (the drill-in for the dashboard Bills
@@ -249,6 +251,8 @@ function BillsPage() {
   })
 
   const filtered = invoices.filter((inv) => matchesFilter(inv, status))
+  // Paginate the filtered set; switching the status tab resets to page 1.
+  const pagination = usePagination(filtered, { resetKey: status })
 
   return (
     <div className="p-4 md:p-6">
@@ -358,7 +362,7 @@ function BillsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((invoice) => {
+                pagination.pageItems.map((invoice) => {
                   const badge = statusBadge(invoice.status)
                   const busy = pendingId === invoice.id
                   const smart = smartActionsFor(invoice.status)
@@ -510,6 +514,12 @@ function BillsPage() {
               )}
             </TableBody>
           </Table>
+          {filtered.length > 0 ? (
+            <TablePagination
+              pagination={pagination}
+              itemLabel={['invoice', 'invoices']}
+            />
+          ) : null}
         </div>
       )}
 

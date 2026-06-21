@@ -15,6 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { TablePagination } from '@/components/ui/pagination'
+import { usePagination } from '@/hooks/use-pagination'
 import { clientsQueryOptions } from '@/routes/clients'
 import { MatterFormDialog } from '@/components/matters/MatterFormDialog'
 
@@ -80,6 +82,7 @@ function formatRate(rate: string | null): string {
 
 function MattersPage() {
   const { data: matters } = useSuspenseQuery(mattersQueryOptions)
+  const pagination = usePagination(matters)
 
   return (
     <div className="p-4 md:p-6">
@@ -117,7 +120,7 @@ function MattersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {matters.map((matter) => (
+              {pagination.pageItems.map((matter) => (
                 <TableRow key={matter.id}>
                   <TableCell className="font-medium">{matter.name}</TableCell>
                   <TableCell>
@@ -156,6 +159,10 @@ function MattersPage() {
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            pagination={pagination}
+            itemLabel={['matter', 'matters']}
+          />
         </div>
       )}
     </div>
